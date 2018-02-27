@@ -114,16 +114,16 @@ export const queryDetails = function(results) {
               },
               { Header: 'Value', accessor: 'value' },
             ]
-            debugger;
-            // const {explained_queries} = row.original.details;
-            const rowData = Object.keys(row.original).map((key)=>{
+
+            const {explained_queries} = row.original;
+            const rowData = Object.keys(explained_queries[0]).map((key) => {
               return {
                 details: key,
-                value: row.original[key].toString(),
+                value: explained_queries[0][key],
               }
             });
             return (
-              <div style={{padding:'10px'}}>
+              <div>
                 <ReactTable
                   data={rowData}
                   columns={columns}
