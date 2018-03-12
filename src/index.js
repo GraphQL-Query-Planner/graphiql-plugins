@@ -39,7 +39,8 @@ export const resolverDetails = function(results) {
         },
         {
           Header: 'Path',
-          accessor: 'path'
+          accessor: 'path',
+          Cell: props => <span>{props.original.path.join(", ")}</span>
         },
         {
           Header: 'Adapter',
