@@ -1,11 +1,10 @@
 # graphiql-plugins
 A collections of plugins for GraphiQL.
 
-* At this time this repo is not published as an npm package. It is used as a git submodule in `GraphQL-Query-Planner/webscale`
+* At this time this repo is not published as an npm package. It is used as a git submodule in our fork of [graphiql-rails](https://github.com/GraphQL-Query-Planner/graphiql-rails), which in turn is consumed in [`webscale`](https://github.com/GraphQL-Query-Planner/webscale).
+
 
 ### Setup
-
-* This package is used as a git submodule in our fork of [graphiql-rails](https://github.com/GraphQL-Query-Planner/graphiql-rails), which in turn is consumed in [`webscale`](https://github.com/GraphQL-Query-Planner/webscale).
 
 * Clone [`webscale`](https://github.com/GraphQL-Query-Planner/webscale) & [`graphiql-rails`](https://github.com/GraphQL-Query-Planner/graphiql-rails)
 
