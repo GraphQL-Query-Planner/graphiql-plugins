@@ -83,7 +83,7 @@ export const queryDetails = function(results) {
     const analyzer = resultsObj.extensions && resultsObj.extensions.analyzer;
     const { resolvers } = analyzer.execution;
 
-    const details = resolvers.map(resolver => resolver.details);
+    const details = [].concat.apply([], resolvers.map(resolver => resolver.details));
 
     if (!analyzer) {
       return (
