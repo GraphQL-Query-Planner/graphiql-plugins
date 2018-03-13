@@ -1,5 +1,6 @@
-import ReactTable from 'react-table';
-import treeTableHOC from 'react-table/lib/hoc/treeTable';
+import ReactTable from "react-table";
+import treeTableHOC from "react-table/lib/hoc/treeTable";
+import { HorizontalBar } from "react-chartjs-2";
 
 const TreeTable = treeTableHOC(ReactTable);
 
@@ -12,51 +13,52 @@ export const viewer = function(results) {
         <h3>An example plugin</h3>
         <div> {results} </div>
       </div>
-    )
+    );
   }
 };
 
 export const resolverDetails = function(results) {
-  if (!results) {return;}
-  const resultsObj = JSON.parse(results)
+  if (!results) {
+    return;
+  }
+  const resultsObj = JSON.parse(results);
   if (resultsObj) {
     const analyzer = resultsObj.extensions && resultsObj.extensions.analyzer;
     const resolvers = analyzer.execution.resolvers;
 
-    if(!analyzer) {
+    if (!analyzer) {
       return (
         <div>
-          <span>Analyzer extenstion not found. </span>
+          <span>Analyzer extenstion not found.</span>
         </div>
-      )
-    }
-    else {
+      );
+    } else {
       const columns = [
         {
-          Header: 'Query ID',
-          accessor: 'id',
+          Header: "Query ID",
+          accessor: "id",
           Cell: props => <span>{props.index + 1}</span>
         },
         {
-          Header: 'Path',
-          accessor: 'path',
+          Header: "Path",
+          accessor: "path",
           Cell: props => <span>{props.original.path.join(", ")}</span>
         },
         {
-          Header: 'Adapter',
-          accessor: 'adapter'
+          Header: "Adapter",
+          accessor: "adapter"
         },
         {
-          Header: 'Parent Type',
-          accessor: 'parentType'
+          Header: "Parent Type",
+          accessor: "parentType"
         },
         {
-          Header: 'Field Name',
-          accessor: 'fieldName'
+          Header: "Field Name",
+          accessor: "fieldName"
         },
         {
-          Header: 'Return Type',
-          accessor: 'returnType'
+          Header: "Return Type",
+          accessor: "returnType"
         }
       ];
 
@@ -67,35 +69,35 @@ export const resolverDetails = function(results) {
           minRows={3}
           showPagination={false}
         />
-      )
+      );
     }
   }
 };
 
-
 export const queryDetails = function(results) {
-  if (!results) {return;}
-  const resultsObj = JSON.parse(results)
+  if (!results) {
+    return;
+  }
+  const resultsObj = JSON.parse(results);
   if (resultsObj) {
     const analyzer = resultsObj.extensions && resultsObj.extensions.analyzer;
-    const {resolvers} = analyzer.execution;
+    const { resolvers } = analyzer.execution;
 
-    const details = resolvers.map((resolver) => resolver.details);
+    const details = resolvers.map(resolver => resolver.details);
 
     if (!analyzer) {
       return (
         <div>
           <span>Analyzer extenstion not found. </span>
         </div>
-      )
-    }
-    else {
+      );
+    } else {
       const columns = [
         {
-          Header: 'Queries',
-          accessor: 'id',
+          Header: "Queries",
+          accessor: "id",
           Cell: props => <span>{props.original.root}</span>
-        },
+        }
       ];
 
       return (
@@ -104,24 +106,25 @@ export const queryDetails = function(results) {
           columns={columns}
           minRows={3}
           showPagination={false}
-
-          SubComponent={(row)=>{
+          SubComponent={row => {
             const columns = [
               {
-                Header: 'Detail',
-                accessor: 'details',
+                Header: "Detail",
+                accessor: "details",
                 width: 150,
-                Cell: (ci) => { return `${ci.value}:`},
+                Cell: ci => {
+                  return `${ci.value}:`;
+                }
               },
-              { Header: 'Value', accessor: 'value' },
-            ]
+              { Header: "Value", accessor: "value" }
+            ];
 
-            const {explained_queries} = row.original;
-            const rowData = Object.keys(explained_queries[0]).map((key) => {
+            const { explained_queries } = row.original;
+            const rowData = Object.keys(explained_queries[0]).map(key => {
               return {
                 details: key,
-                value: explained_queries[0][key],
-              }
+                value: explained_queries[0][key]
+              };
             });
             return (
               <div>
@@ -135,7 +138,99 @@ export const queryDetails = function(results) {
             );
           }}
         />
-      )
+      );
     }
+  }
+};
+
+function formatToMS(time) {
+  const NS_TO_MS = 1000000;
+  return (time / NS_TO_MS).toFixed(2);
+}
+
+export const apolloTracing = function(results) {
+  if (!results) {
+    return;
+  }
+  const resultsObj = JSON.parse(results);
+  if (resultsObj) {
+
+    const tracing = resultsObj.extensions && resultsObj.extensions.tracing;
+    const msec = formatToMS(tracing.duration);
+
+    const resolvers = tracing.execution && tracing.execution.resolvers;
+    if (!resolvers) { return; }
+
+    const labels = resolvers.map(resolver => resolver.path.join(", "))
+    const startData = resolvers.map(resolver => formatToMS(resolver.startOffset))
+    const durationData = resolvers.map(resolver => formatToMS(resolver.duration))
+
+    const data = {
+      labels,
+
+      datasets: [
+        {
+          data: startData,
+          backgroundColor: "rgba(63,103,126,0)",
+          hoverBackgroundColor: "rgba(50,90,100,0)",
+        },
+        {
+          data: durationData,
+          backgroundColor: "#D64292"
+        }
+      ]
+    };
+
+    const options = {
+      hover: {
+        animationDuration: 5
+      },
+      scales: {
+        xAxes: [
+          {
+            label: "Duration",
+            ticks: {
+              beginAtZero: true,
+              fontFamily: "'Open Sans Bold', sans-serif",
+              fontSize: 14
+            },
+            scaleLabel: {
+              display: false
+            },
+            gridLines: {},
+            stacked: true,
+            barThickness: 20,
+          }
+        ],
+        yAxes: [
+          {
+            gridLines: {
+              display: true,
+              color: "#fff",
+              zeroLineColor: "#fff",
+              zeroLineWidth: 0
+            },
+            ticks: {
+              fontFamily: "'Open Sans Bold', sans-serif",
+              fontSize: 12
+            },
+            stacked: true,
+            barThickness: 20,
+          }
+        ]
+      },
+      legend: {
+        display: false
+      }
+    };
+
+    return (
+      <div>
+        <div>
+          <span> <b> {"Duration:"} </b> {msec} {"ms"} </span>
+        </div>
+        <HorizontalBar data={data} options={options} />
+      </div>
+    );
   }
 };
