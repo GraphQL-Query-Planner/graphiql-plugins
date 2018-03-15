@@ -232,6 +232,7 @@ export const apolloTracing = function(results) {
     const labels = resolvers.map(resolver => resolver.path.join(", "))
     const startData = resolvers.map(resolver => formatToMS(resolver.startOffset))
     const durationData = resolvers.map(resolver => formatToMS(resolver.duration))
+    const displayTicks = labels.length > 30 ? false : true;
 
     const data = {
       labels,
@@ -268,8 +269,6 @@ export const apolloTracing = function(results) {
               labelString: "Duration",
             },
             stacked: true,
-            barThickness: 10,
-            weight: 5,
           }
         ],
         yAxes: [
@@ -281,15 +280,14 @@ export const apolloTracing = function(results) {
               zeroLineWidth: 0
             },
             ticks: {
-              fontSize: 12,
+              display: displayTicks,
+              fontSize: 11,
             },
             scaleLabel: {
               display: true,
-              labelString: "Resolver Path",
+              labelString: "Resolver",
             },
-            weight: 5,
             stacked: true,
-            barThickness: 10,
           }
         ]
       },
@@ -298,9 +296,12 @@ export const apolloTracing = function(results) {
       }
     };
 
+    const style = {
+      margin: '25px'
+    }
     return (
       <div>
-        <div>
+        <div style={style}>
           <span> <b> {"Duration:"} </b> {msec} {"ms"} </span>
         </div>
         <HorizontalBar data={data} options={options} />
