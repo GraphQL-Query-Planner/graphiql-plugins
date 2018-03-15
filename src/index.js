@@ -247,7 +247,7 @@ export const apolloTracing = function(results) {
         {
           data: durationData,
           backgroundColor: "#D64292",
-          label: "Duration (ms)"
+          label: "Time (ms)"
         }
       ]
     };
@@ -266,7 +266,7 @@ export const apolloTracing = function(results) {
             },
             scaleLabel: {
               display: true,
-              labelString: "Duration",
+              labelString: "Time (ms)",
             },
             stacked: true,
           }
@@ -285,7 +285,7 @@ export const apolloTracing = function(results) {
             },
             scaleLabel: {
               display: true,
-              labelString: "Resolver",
+              labelString: "Resolvers",
             },
             stacked: true,
           }
@@ -302,7 +302,7 @@ export const apolloTracing = function(results) {
     return (
       <div>
         <div style={style}>
-          <span> <b> {"Duration:"} </b> {msec} {"ms"} </span>
+          <span> <b> {"Total Query Execution Time: "} </b> {msec} {"ms"} </span>
         </div>
         <HorizontalBar data={data} options={options} />
       </div>
