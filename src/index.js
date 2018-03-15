@@ -21,7 +21,18 @@ export const resolverDetails = function(results) {
   if (!results) {
     return;
   }
-  const resultsObj = JSON.parse(results);
+
+  let resultsObj;
+  try {
+    resultsObj = JSON.parse(results);
+  } catch(e) {
+    throw new Error('Error found in query');
+  }
+
+  if (resultsObj.errors) {
+    return 'Error found in query';
+  }
+
   if (resultsObj) {
     const analyzer = resultsObj.extensions && resultsObj.extensions.analyzer;
     const resolvers = analyzer.execution.resolvers;
@@ -78,12 +89,54 @@ export const queryDetails = function(results) {
   if (!results) {
     return;
   }
-  const resultsObj = JSON.parse(results);
+
+  let resultsObj;
+  try {
+    resultsObj = JSON.parse(results);
+  } catch(e) {
+    throw new Error('Error found in query');
+  }
+
+  if (resultsObj.errors) {
+    return 'Error found in query';
+  }
+
   if (resultsObj) {
+
     const analyzer = resultsObj.extensions && resultsObj.extensions.analyzer;
     const { resolvers } = analyzer.execution;
 
-    const details = [].concat.apply([], resolvers.map(resolver => resolver.details));
+    let details;
+
+    const elasticSearch = resolvers[0].adapter === 'elasticsearch'
+    if (elasticSearch){
+      const originalDetails = [].concat.apply([], resolvers.map((resolver) => resolver.details));
+      details = originalDetails.map((detail) => {
+        const {payload} = detail
+        const {name, klass, search} = payload;
+        const {index, type, q} = search;
+        return {
+          id: `${detail.name} - ${detail.id}`,
+          name,
+          klass,
+          'search.index': index.join(", "),
+          'search.type': type.join(", "),
+          'search.query': q,
+        }
+      })
+    } else {
+      details = [].concat.apply([], resolvers.map(resolver => resolver.details));
+    }
+
+    const getHeaderTitle = function(props) {
+      if (props.original.root) {
+        return props.original.root
+      }
+      if (props.original.id && props.original.id.includes('elasticsearch')) {
+        return `${props.original.id}`
+      }
+      return '';
+    }
 
     if (!analyzer) {
       return (
@@ -92,11 +145,13 @@ export const queryDetails = function(results) {
         </div>
       );
     } else {
+
+
       const columns = [
         {
           Header: "Queries",
           accessor: "id",
-          Cell: props => <span>{props.original.root}</span>
+          Cell: props => <span>{getHeaderTitle(props)}</span>
         }
       ];
 
@@ -120,12 +175,14 @@ export const queryDetails = function(results) {
             ];
 
             const { explained_queries } = row.original;
-            const rowData = Object.keys(explained_queries[0]).map(key => {
-              return {
-                details: key,
-                value: explained_queries[0][key]
-              };
-            });
+            const collapsedData = explained_queries ? explained_queries[0] : row.original;
+
+            const rowData = Object.keys(collapsedData).map(key => {
+                return {
+                  details: key,
+                  value: collapsedData[key]
+                };
+              });
             return (
               <div>
                 <ReactTable
@@ -152,7 +209,18 @@ export const apolloTracing = function(results) {
   if (!results) {
     return;
   }
-  const resultsObj = JSON.parse(results);
+
+  let resultsObj;
+  try {
+    resultsObj = JSON.parse(results);
+  } catch(e) {
+    throw new Error('Error found in query');
+  }
+
+  if (resultsObj.errors) {
+    return 'Error found in query';
+  }
+
   if (resultsObj) {
 
     const tracing = resultsObj.extensions && resultsObj.extensions.tracing;
