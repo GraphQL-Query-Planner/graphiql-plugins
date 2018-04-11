@@ -1,3 +1,4 @@
+import React from 'react';
 import ReactTable from "react-table";
 import treeTableHOC from "react-table/lib/hoc/treeTable";
 import { HorizontalBar } from "react-chartjs-2";
